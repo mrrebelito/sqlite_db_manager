@@ -1,0 +1,3 @@
+requests==2.31.0
+sqlite_utls==3.35.2
+datasette==0.64.5
