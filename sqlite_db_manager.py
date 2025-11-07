@@ -58,7 +58,7 @@ class DB:
                 )
             
 
-    def insert_json_into_table(self, table_name):
+    def insert_json_into_table(self, table_name, add_datetime_field=None):
         """
         Insert json into database table. 
 
@@ -66,14 +66,14 @@ class DB:
             table_name (str): table to have data inserted into
         """
 
-        # will not work in class since db is initialized 
-        # if True, delete with function
-        if self.delete_db == True:
-            self.db = remove_db_if_exists(self.db_path)
-            self.db = sqlite_utils.Database(self.db_path)
-        else:
-            # initize if db isn't too be deleted
-            self.db = sqlite_utils.Database(self.db_path) # file object
+        # # will not work in class since db is initialized 
+        # # if True, delete with function
+        # if self.delete_db == True:
+        #     self.db = remove_db_if_exists(self.db_path)
+        #     self.db = sqlite_utils.Database(self.db_path)
+        # else:
+        #     # initize if db isn't too be deleted
+        #     self.db = sqlite_utils.Database(self.db_path) # file object
 
 
         # loop through processed_output folder to 
@@ -89,33 +89,26 @@ class DB:
                 with open(json_data, 'r',  encoding='utf-8') as f:
                     json_data = json.load(f)
 
+                # add datetime field to json
+                if add_datetime_field:
+                    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+                if isinstance(json_data, list):
+                    for record in json_data:
+                        if isinstance(record, dict):
+                            record[add_datetime_field] = current_time
+                elif isinstance(json_data, dict):
+                    json_data[add_datetime_field] = current_time
+
+                # insert data
                 try:
                     insert_data(self.db, json_data, table_name)
                 except Exception as e:
                     print(e)
 
+    
 
-    def add_datetime_col_to_table(self, table_name, pk, dt_field_name="Date Created"):
-        """
-        add a datetime column.
-
-        Parameters: 
-            table_name(str): name of table you wish to add a datetime field
-            pk(str): Primary key field, required for updating existing records 
-            dt_field_name (str): pass arg to customize datetime field (dt created/updated)
-        """
-        
-        today = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
-
-        for row in self.db.query(f"select * from {table_name}"):
-            row[dt_field_name] = today 
-
-            # add param/arg 'alter=True' to update existing record
-            self.db[table_name].upsert(row, pk=pk, alter=True)
-
-
-    def upsert_data_into_table(self, table_name):
+    def upsert_data_into_table(self, table_name, add_datetime_field=None):
         """
         Updated database according to required pk
 
@@ -138,10 +131,23 @@ class DB:
                 with open(json_data, 'r',  encoding='utf-8') as f:
                     json_data = json.load(f)
 
+                # add datetime field to json
+                if add_datetime_field:
+                    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+                if isinstance(json_data, list):
+                    for record in json_data:
+                        if isinstance(record, dict):
+                            record[add_datetime_field] = current_time
+                elif isinstance(json_data, dict):
+                    json_data[add_datetime_field] = current_time
+
                 # upsert data function
-                upsert_data(self.db_path, json_data, table_name, self.pk)
+                try:
+                    upsert_data(self.db_path, json_data, table_name, self.pk)
+                except Exception as e:
+                    print(e)
                 
-        self.db.close()
 
 
     def delete_data_from_table(self):
@@ -196,8 +202,6 @@ def create_or_connect_to_db(db_path, delete_db=False):
 
     if delete_db == True:
         db = remove_db_if_exists(db_path)
-        db = sqlite_utils.Database(db_path)
-        return db
     else:
         # initize if db isn't too be deleted
         db = sqlite_utils.Database(db_path) # file object
