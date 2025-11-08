@@ -92,13 +92,14 @@ class DB:
                 # add datetime field to json
                 if add_datetime_field:
                     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    print(current_time)
 
-                if isinstance(json_data, list):
-                    for record in json_data:
-                        if isinstance(record, dict):
-                            record[add_datetime_field] = current_time
-                elif isinstance(json_data, dict):
-                    json_data[add_datetime_field] = current_time
+                    if isinstance(json_data, list):
+                        for record in json_data:
+                            if isinstance(record, dict):
+                                record[add_datetime_field] = current_time
+                    elif isinstance(json_data, dict):
+                        json_data[add_datetime_field] = current_time
 
                 # insert data
                 try:
@@ -135,12 +136,12 @@ class DB:
                 if add_datetime_field:
                     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-                if isinstance(json_data, list):
-                    for record in json_data:
-                        if isinstance(record, dict):
-                            record[add_datetime_field] = current_time
-                elif isinstance(json_data, dict):
-                    json_data[add_datetime_field] = current_time
+                    if isinstance(json_data, list):
+                        for record in json_data:
+                            if isinstance(record, dict):
+                                record[add_datetime_field] = current_time
+                    elif isinstance(json_data, dict):
+                        json_data[add_datetime_field] = current_time
 
                 # upsert data function
                 try:
@@ -247,5 +248,5 @@ if __name__ == "__main__":
     db = DB('test.db', 'myapp')
     # table_name, json_path, fields, pk, fts=None
     db.create_table(main_table, "data", main_fields, main_pk, main_fts)
-    # db.insert_json_into_table(main_table)
+    db.insert_json_into_table(main_table, "Date Added")
     
