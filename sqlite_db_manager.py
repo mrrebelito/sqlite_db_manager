@@ -249,4 +249,3 @@ if __name__ == "__main__":
     # table_name, json_path, fields, pk, fts=None
     db.create_table(main_table, "data", main_fields, main_pk, main_fts)
     db.insert_json_into_table(main_table, "Date Added")
-    
